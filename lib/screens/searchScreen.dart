@@ -15,6 +15,7 @@ class Searchscreen extends StatefulWidget {
 }
 
 class _SearchscreenState extends State<Searchscreen> {
+  // เอาไปดึงข้อมูลทุก 10 วิ
   Timer? _timer;
   // เตรียมดึงข้อมูล getCoins
   final coinService = CoinService();
@@ -23,6 +24,7 @@ class _SearchscreenState extends State<Searchscreen> {
   // เอาไปแสดงที่ ListView
   List<dynamic> _coinsShowList = [];
 
+  // จับเหตุการณ์การ scroll
   final ScrollController _scrollController = ScrollController();
   // แสดง 10 รายการแรก
   int _displayCount = 10;
@@ -59,7 +61,9 @@ class _SearchscreenState extends State<Searchscreen> {
         _coinsShowList = data['coins'] ?? [];
       });
     } catch (e) {
-      AlertDialog(title: const Text("Error"), content: Text(e.toString()));
+      print(
+        '$e : API request limit. Generate a free API key: https://developers.coinranking.com/create-account',
+      );
     }
   }
 
@@ -73,7 +77,9 @@ class _SearchscreenState extends State<Searchscreen> {
 
   void _loadMore() {
     // ถ้า search อยู่ ไม่ต้อง skip 3
-    final list = _isSearchData ? _coinsShowList.skip(3).toList() : _coinsShowList;
+    final list = _isSearchData
+        ? _coinsShowList.skip(3).toList()
+        : _coinsShowList;
 
     // โหลดอยู่ ไม่ต้องทำซ้ำ
     // แสดงครบ ไม่ต้องทำซ้ำ
@@ -146,7 +152,15 @@ class _SearchscreenState extends State<Searchscreen> {
           _displayCount = 10;
         });
       } catch (e) {
-        AlertDialog(title: const Text("Error"), content: Text(e.toString()));
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text("API request limit."),
+            content: Text(
+              "Generate a free API key: https://developers.coinranking.com/create-account",
+            ),
+          ),
+        );
       }
     });
   }
@@ -164,17 +178,8 @@ class _SearchscreenState extends State<Searchscreen> {
       final data = await coinDetailService.getCoinsDetail(uuid);
       setState(() => _coinDetail = data['coin']);
     } catch (e) {
-      AlertDialog(
-        title: const Text(
-          "You've reached the API request limit. Generate a free API key: https://developers.coinranking.com/create-account",
-        ),
-        content: Text(e.toString()),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
+      print(
+        '$e : API request limit. Generate a free API key: https://developers.coinranking.com/create-account',
       );
     } finally {
       setState(() => _isLoadingDetail = false);
